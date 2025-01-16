@@ -51,8 +51,8 @@ def chat_seaweed():
 
 #     return jsonify({"provider": provider, "question": question, "answer": answer})
 
-@app.route('/api/ask', methods=['POST'])
-async def ask_question():
+@app.route('/api/ask-indria', methods=['POST'])
+async def ask_law_question():
     data = request.json
     question = data.get("question")
     provider = data.get("provider", "openai").lower()
