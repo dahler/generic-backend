@@ -7,7 +7,7 @@ class DeepSeekAIManager:
     # def __init__(self):
 
 
-    def ask_deepseek(self, message, model="deepseek-chat"):
+    async def ask_deepseek(self, message, model="deepseek-chat"):
         try:
             client = OpenAI(api_key=deepseek, base_url="https://api.deepseek.com")
             response = client.chat.completions.create(

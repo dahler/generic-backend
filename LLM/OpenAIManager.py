@@ -7,9 +7,7 @@ openai.api_key = openai_key
 class OpenAIManager:
 
     # def __init__(self):
-
-
-    def ask_openai(self, message, model="gpt-4o-mini"):
+    async def ask_openai(self, message, model="gpt-4o-mini"):
         try:
             response = openai.chat.completions.create(
                 model=model,

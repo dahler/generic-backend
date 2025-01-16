@@ -18,8 +18,9 @@ from LLM.AIManager import AIManager
 from DBManager import get_session
 
 app = Flask(__name__)
-manager = AIManager("deepseek")
-
+# manager = AIManager("deepseek")
+db_manager = DBManager(get_session)
+ai_manager = AIManager("deepseek") 
 
 
 
@@ -51,8 +52,7 @@ def chat_seaweed():
 #     return jsonify({"provider": provider, "question": question, "answer": answer})
 
 @app.route('/api/ask', methods=['POST'])
-def ask_question():
-    db_manager = DBManager(get_session)
+async def ask_question():
     data = request.json
     question = data.get("question")
     provider = data.get("provider", "openai").lower()
@@ -62,41 +62,40 @@ def ask_question():
         return jsonify({"error": "Question is required"}), 400
 
     prev_con = None
-    # Create or retrieve a conversation in the same session contextv = 
-    # with db_manager.session_factory() as session:
+
+    # Create or retrieve a conversation
     if conversation_id:
-            conversation = db_manager.get_conversation(conversation_id)
-            prev_con = db_manager.get_conversation_messages(conversation_id)
-            # if not conversation:
-            #     return jsonify({"error": "Invalid conversation ID"}), 404
-            # session.refresh(conversation)  # Refresh the conversation to ensure it's in the session
+        conversation = db_manager.get_conversation(conversation_id)
+        prev_con = db_manager.get_conversation_messages(conversation_id)
     else:
-            # Create a new conversation and keep it in the session
-            print("Inserting new record")
-            conversation = db_manager.create_conversation()
-            conversation_id = conversation["id"]
-            print(conversation_id)
-        
-        # Save the user's question to the conversation
-    pa = db_manager.save_message(content=question, role="user", conversation_id=conversation_id)
+        # Create a new conversation
+        print("Inserting new record")
+        conversation = db_manager.create_conversation()
+        conversation_id = conversation["id"]
+        print(conversation_id)
 
-    
-        
-    # Generate the assistant's answer (insert your logic here)
-    answer, error = manager.ask_ai(question, previous_conversation=prev_con, document_context=None)
-    # Save the assistant's answer to the conversation
-    db_manager.save_message( content=answer, role="assistant", conversation_id=conversation_id)
+    # Save the user's question to the conversation
+    db_manager.save_message(content=question, role="user", conversation_id=conversation_id)
 
-    # Query the messages in the same session
-    # messages = db_manager.get_conversation_messages(conversation_id)
+    # Generate the assistant's answer
+    try:
+        answer, error = await ai_manager.ask_ai(question, previous_conversation=prev_con, document_context=None)
+        if error:
+            print(error)
+            return jsonify({"error": error}), 500
 
-    # Prepare the response
-    response = {
-        "conversation_id": conversation_id,
-        "messages": answer,
-    }
+        # Save the assistant's answer to the conversation
+        db_manager.save_message(content=answer, role="assistant", conversation_id=conversation_id)
 
-    return jsonify(response)
+        # Prepare the response
+        response = {
+            "conversation_id": conversation_id,
+            "messages": answer,
+        }
+        return jsonify(response)
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
     app.run(debug=True)

@@ -26,29 +26,29 @@ class AIManager:
         """Set the AI service provider dynamically."""
         self.provider = provider
 
-    def ask(self, prompt):
+    async def ask(self, prompt):
         """Route the question to the appropriate AI provider."""
         if self.provider == "openai":
             oi = OpenAIManager()
-            return oi.ask_openai(prompt)
+            return await oi.ask_openai(prompt)
         elif self.provider == "deepseek":
             ds = DeepSeekAIManager()
-            return ds.ask_deepseek(prompt)
+            return await ds.ask_deepseek(prompt)
         elif self.provider == "cloud":
             return self.ask_cloud(prompt)
         else:
             raise ValueError(f"Unsupported provider: {self.provider}")
         
 
-    def check_what_to_search(self, question):
+    async def check_what_to_search(self, question):
         prompt = f""" 
         {self.rules_general}
 
         Jawab Pertanyaan: {question}
         """
-        return self.ask(prompt)
+        return await self.ask(prompt)
     
-    def ask_ai(self, question, previous_conversation=None, document_context=None):
+    async def ask_ai(self, question, previous_conversation=None, document_context=None):
         context = ""
         if previous_conversation:
             context += f"Percakapan Sebelumnya: {previous_conversation}\n"
@@ -65,9 +65,9 @@ class AIManager:
         Jawaban:
         """
         # print(prompt)
-        return self.ask(prompt)
+        return await self.ask(prompt)
 
-    def create_prompt_bank(self, question, previous_question=None, previous_conversation=None, document_context=None):
+    async def create_prompt_bank(self, question, previous_question=None, previous_conversation=None, document_context=None):
         context = ""
         if previous_conversation:
             context += f"Percakapan Sebelumnya: {previous_conversation}\n"
@@ -85,9 +85,9 @@ class AIManager:
         Followup:
         """
         # print(prompt)
-        return self.ask(prompt)
+        return await self.ask(prompt)
 
-    def get_investment_return(self, question):
+    async def get_investment_return(self, question):
         prompt = f"""
         {self.rules_investment}
 
@@ -100,9 +100,9 @@ class AIManager:
         """
 
         # print (prompt)
-        return self.ask(prompt)
+        return await self.ask(prompt)
 
-    def get_usaha_return(self, question):
+    async def get_usaha_return(self, question):
         prompt = f"""
         {self.rules_usaha}
 
@@ -114,9 +114,9 @@ class AIManager:
         """
 
         # print (prompt)
-        return self.ask(prompt)
+        return await self.ask(prompt)
     
-    def get_usaha_advise(self, question, context):
+    async def get_usaha_advise(self, question, context):
         prompt = f"""
         {self.rules_advise}
         user-context: {context}
@@ -124,5 +124,5 @@ class AIManager:
         """
 
         # print (prompt)
-        return self.ask(prompt)
+        return await self.ask(prompt)
     
