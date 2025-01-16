@@ -12,6 +12,7 @@ class AIManager:
         self.rules_investment = self.load_rules(os.path.join(base_dir, "rules", "rules_investment.txt"))
         self.rules_usaha = self.load_rules(os.path.join(base_dir, "rules", "rules_usaha.txt"))
         self.rules_advise = self.load_rules(os.path.join(base_dir, "rules", "rules_advise.txt"))
+        self.rules_law = self.load_rules(os.path.join(base_dir, "rules", "rules_general_law.txt"))
 
     def load_rules(self, filepath):
         try:
@@ -48,7 +49,7 @@ class AIManager:
         """
         return await self.ask(prompt)
     
-    async def ask_ai(self, question, previous_conversation=None, document_context=None):
+    async def ask_law_ai(self, question, previous_conversation=None, document_context=None):
         context = ""
         if previous_conversation:
             context += f"Percakapan Sebelumnya: {previous_conversation}\n"
@@ -56,7 +57,7 @@ class AIManager:
             context += f"Data dari Dokumen: {document_context}\n"
 
         prompt = f"""
-        {self.rules_general}
+        {self.rules_law}
 
         {context}
 
@@ -67,62 +68,62 @@ class AIManager:
         # print(prompt)
         return await self.ask(prompt)
 
-    async def create_prompt_bank(self, question, previous_question=None, previous_conversation=None, document_context=None):
-        context = ""
-        if previous_conversation:
-            context += f"Percakapan Sebelumnya: {previous_conversation}\n"
-        if document_context:
-            context += f"Data dari Dokumen: {document_context}\n"
+    # async def create_prompt_bank(self, question, previous_question=None, previous_conversation=None, document_context=None):
+    #     context = ""
+    #     if previous_conversation:
+    #         context += f"Percakapan Sebelumnya: {previous_conversation}\n"
+    #     if document_context:
+    #         context += f"Data dari Dokumen: {document_context}\n"
 
-        prompt = f"""
-        {self.rules_general}
+    #     prompt = f"""
+    #     {self.rules_general}
 
-        {context}
+    #     {context}
 
-        Pertanyaan: {question}
-        Have the response in the format below
-        Jawaban:
-        Followup:
-        """
-        # print(prompt)
-        return await self.ask(prompt)
+    #     Pertanyaan: {question}
+    #     Have the response in the format below
+    #     Jawaban:
+    #     Followup:
+    #     """
+    #     # print(prompt)
+    #     return await self.ask(prompt)
 
-    async def get_investment_return(self, question):
-        prompt = f"""
-        {self.rules_investment}
+    # async def get_investment_return(self, question):
+    #     prompt = f"""
+    #     {self.rules_investment}
 
-        Pertanyaan: {question}
-        Asumsi:
-        Perhitungan:
-        Hasil:
-        Saran:
-        Followup:
-        """
+    #     Pertanyaan: {question}
+    #     Asumsi:
+    #     Perhitungan:
+    #     Hasil:
+    #     Saran:
+    #     Followup:
+    #     """
 
-        # print (prompt)
-        return await self.ask(prompt)
+    #     # print (prompt)
+    #     return await self.ask(prompt)
 
-    async def get_usaha_return(self, question):
-        prompt = f"""
-        {self.rules_usaha}
+    # async def get_usaha_return(self, question):
+    #     prompt = f"""
+    #     {self.rules_usaha}
 
-        Pertanyaan: {question}
-        Asumsi:
-        Perhitungan:
-        Hasil:
-        Saran:
-        """
+    #     Pertanyaan: {question}
+    #     Asumsi:
+    #     Perhitungan:
+    #     Hasil:
+    #     Saran:
+    #     """
 
-        # print (prompt)
-        return await self.ask(prompt)
+    #     # print (prompt)
+    #     return await self.ask(prompt)
     
-    async def get_usaha_advise(self, question, context):
-        prompt = f"""
-        {self.rules_advise}
-        user-context: {context}
-        Pertanyaan: {question}
-        """
+    # async def get_usaha_advise(self, question, context):
+    #     prompt = f"""
+    #     {self.rules_advise}
+    #     user-context: {context}
+    #     Pertanyaan: {question}
+    #     """
 
-        # print (prompt)
-        return await self.ask(prompt)
+    #     # print (prompt)
+    #     return await self.ask(prompt)
     

@@ -79,7 +79,7 @@ async def ask_question():
 
     # Generate the assistant's answer
     try:
-        answer, error = await ai_manager.ask_ai(question, previous_conversation=prev_con, document_context=None)
+        answer, error = await ai_manager.ask_law_ai(question, previous_conversation=prev_con, document_context=None)
         if error:
             print(error)
             return jsonify({"error": error}), 500
