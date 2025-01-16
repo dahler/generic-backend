@@ -75,6 +75,7 @@ def ask_question():
             print("Inserting new record")
             conversation = db_manager.create_conversation()
             conversation_id = conversation["id"]
+            print(conversation_id)
         
         # Save the user's question to the conversation
     pa = db_manager.save_message(content=question, role="user", conversation_id=conversation_id)

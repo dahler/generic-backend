@@ -4,8 +4,7 @@ from sqlalchemy.orm import sessionmaker, scoped_session
 from .Models import Base
 from config.config import db_url
 
-# Create the engine
-# db_url = db_url
+print(db_url)
 engine = create_engine(db_url)
 
 # Create a configured "Session" class
