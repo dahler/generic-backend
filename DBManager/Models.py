@@ -33,3 +33,10 @@ class Message(BaseModel):
     role = Column(String(50), nullable=False)  # e.g., 'user' or 'assistant'
     created_at = Column(DateTime, default=datetime.utcnow)
     conversation = relationship("Conversation", back_populates="messages")
+
+
+# class LawDocument(BaseModel):
+#     __tablename__ = "law_documents"
+#     id = Column(Integer, primary_key=True)
+#     content = Column(Text, nullable=False)
+#     metadata = Column(String(15000), nullable=False) 
