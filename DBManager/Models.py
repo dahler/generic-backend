@@ -35,8 +35,8 @@ class Message(BaseModel):
     conversation = relationship("Conversation", back_populates="messages")
 
 
-# class LawDocument(BaseModel):
-#     __tablename__ = "law_documents"
-#     id = Column(Integer, primary_key=True)
-#     content = Column(Text, nullable=False)
-#     metadata = Column(String(15000), nullable=False) 
+class LawDocument(Base):
+    __tablename__ = "law_documents"
+    id = Column(Integer, primary_key=True)
+    content = Column(Text, nullable=False)
+    metadata_column = Column("metadata", String(255))  # Alias the column name

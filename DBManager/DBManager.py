@@ -1,4 +1,4 @@
-from .Models import Conversation, Message
+from .Models import Conversation, LawDocument, Message
 from sqlalchemy.orm import scoped_session
 
 
@@ -38,5 +38,26 @@ class DBManager:
             .all()
         )
         return [{"role": m.role, "content": m.content} for m in messages]
+    
+    def get_context(self, id):
+        """Retrieve a single document by its ID."""
+        with self.session_factory() as session:
+            # Query the database
+            document = (
+                session.query(LawDocument.content, LawDocument.metadata_column)
+                .filter(LawDocument.id == int(id))
+                .first()
+            )
+        
+            # Handle the case where no document is found
+            if not document:
+                return None
+
+            # Construct and return the result
+            return {
+                "content": document.content,
+                "metadata": document.metadata_column
+            }
+
             
 

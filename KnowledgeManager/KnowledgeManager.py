@@ -6,19 +6,21 @@ import psycopg2
 from urllib.parse import urlparse
 from config.config import db_url
 
-# db_url = os.getenv("APP_DB")
-if not db_url:
-    raise ValueError("Environment variable APP_DB is not set.")
 
-parsed_url = urlparse(db_url)
-POSTGRES_CONFIG = {
-    'host': parsed_url.hostname,
-    'port': parsed_url.port,
-    'user': parsed_url.username,
-    'password': parsed_url.password,
-    'database': parsed_url.path.lstrip('/')
-}
-print(POSTGRES_CONFIG)
+
+# db_url = os.getenv("APP_DB")
+# if not db_url:
+#     raise ValueError("Environment variable APP_DB is not set.")
+
+# parsed_url = urlparse(db_url)
+# POSTGRES_CONFIG = {
+#     'host': parsed_url.hostname,
+#     'port': parsed_url.port,
+#     'user': parsed_url.username,
+#     'password': parsed_url.password,
+#     'database': parsed_url.path.lstrip('/')
+# }
+# print(POSTGRES_CONFIG)
 # PostgreSQL Database Configuration
 # POSTGRES_CONFIG = {
 #     'host': 'localhost',
@@ -68,23 +70,27 @@ class KnowledgeManager:
 
         # Search the FAISS index
         distances, indices = self.index.search(query_embedding, top_k)
-        print("Distances:", distances)
+        print("Distances:", indices)
 
         results = []
         if indices is not None and distances is not None:
-            connection = psycopg2.connect(**POSTGRES_CONFIG)
-            cursor = connection.cursor()
+            for idx in indices[0]:
+                print(int(idx))
+                results.append(idx)
+                 
+            # connection = psycopg2.connect(**POSTGRES_CONFIG)
+            # cursor = connection.cursor()
 
-            for dist, idx in zip(distances[0], indices[0]):
-                if idx == -1:  # Skip invalid indices
-                    continue
-                if dist > distance_threshold:  # Include only results within the threshold
-                    cursor.execute("SELECT content, metadata FROM law_documents WHERE id = %s;", (int(idx),))
-                    result = cursor.fetchone()
-                    if result:
-                        results.append({"content": result[0], "metadata": result[1], "distance": str(dist)})
+            # for dist, idx in zip(distances[0], indices[0]):
+            #     if idx == -1:  # Skip invalid indices
+            #         continue
+            #     if dist > distance_threshold:  # Include only results within the threshold
+            #         cursor.execute("SELECT content, metadata FROM law_documents WHERE id = %s;", (int(idx),))
+            #         result = cursor.fetchone()
+            #         if result:
+            #             results.append({"content": result[0], "metadata": result[1], "distance": str(dist)})
 
-            cursor.close()
-            connection.close()
+            # cursor.close()
+            # connection.close()
 
         return results
