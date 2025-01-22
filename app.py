@@ -30,7 +30,7 @@ def chat_seaweed():
     return jsonify("Chat seaweed")
 
 
-@app.route('/api/ask-indria', methods=['POST'])
+@app.route('/api/ask-indria-faiss', methods=['POST'])
 async def ask_law_question():
     data = request.json
     question = data.get("question")
@@ -88,7 +88,7 @@ async def ask_law_question():
 
 
 
-@app.route('/api/ask-indria-bare', methods=['POST'])
+@app.route('/api/ask-indria', methods=['POST'])
 async def ask_law_question_bare():
     data = request.json
     question = data.get("question")
