@@ -16,7 +16,7 @@ from flask import (
 from DBManager.DBManager import DBManager
 from LLM.AIManager import AIManager
 from DBManager import get_session
-from KnowledgeManager.KnowledgeManager import KnowledgeManager
+# from KnowledgeManager.KnowledgeManager import KnowledgeManager
 
 app = Flask(__name__)
 # manager = AIManager("deepseek")
