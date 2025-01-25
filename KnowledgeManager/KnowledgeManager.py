@@ -38,7 +38,7 @@ class KnowledgeManager:
                 cls._faiss_index = faiss.read_index(cls._index_path)
                 print(f"FAISS index loaded from {cls._index_path}.")
 
-    def search(self, query, top_k=3, distance_threshold=0.8):
+    def search(self, query, top_k=3, distance_threshold=8):
         """
         Search the FAISS index for the top results matching the query.
         
@@ -58,7 +58,7 @@ class KnowledgeManager:
 
         # Search the FAISS index
         distances, indices = KnowledgeManager._faiss_index.search(query_embedding, top_k)
-
+        print("Distances", distances)
         # Filter results based on distance threshold
         results = [
             int(idx) for dist, idx in zip(distances[0], indices[0])
