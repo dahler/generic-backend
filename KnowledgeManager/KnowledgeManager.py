@@ -2,9 +2,14 @@ import os
 import faiss
 import numpy as np
 from sentence_transformers import SentenceTransformer
-
+from multiprocessing import Lock
 
 class KnowledgeManager:
+    # Class-level attributes
+    _faiss_index = None
+    _index_path = None
+    _lock = Lock()  # Multiprocessing lock to ensure thread-safety
+
     def __init__(self, 
                  index_path=None, 
                  embedding_model_name='paraphrase-multilingual-mpnet-base-v2'):
@@ -14,19 +19,24 @@ class KnowledgeManager:
         :param index_path: Path to the FAISS index file.
         :param embedding_model_name: Pre-trained embedding model name.
         """
-        self.index_path = index_path or os.path.join("KnowledgeManager", "faiss_index.bin")
-        self.embedding_model = SentenceTransformer(embedding_model_name)
-        self.index = None
-
-    def load_faiss_index(self):
-        """
-        Load the FAISS index from the specified path.
-        """
-        if not os.path.exists(self.index_path):
-            raise FileNotFoundError(f"FAISS index file not found at {self.index_path}")
+        if KnowledgeManager._index_path is None:
+            KnowledgeManager._index_path = index_path or os.path.join("KnowledgeManager", "faiss_index.bin")
         
-        self.index = faiss.read_index(self.index_path)
-        print(f"FAISS index loaded from {self.index_path}.")
+        self.embedding_model = SentenceTransformer(embedding_model_name)
+        self._ensure_faiss_index_loaded()
+
+    @classmethod
+    def _ensure_faiss_index_loaded(cls):
+        """
+        Ensure the FAISS index is loaded across workers.
+        """
+        with cls._lock:  # Ensure only one worker loads the index at a time
+            if cls._faiss_index is None:
+                if not os.path.exists(cls._index_path):
+                    raise FileNotFoundError(f"FAISS index file not found at {cls._index_path}")
+                
+                cls._faiss_index = faiss.read_index(cls._index_path)
+                print(f"FAISS index loaded from {cls._index_path}.")
 
     def search(self, query, top_k=3, distance_threshold=0.8):
         """
@@ -38,9 +48,7 @@ class KnowledgeManager:
         :return: A list of indices matching the query.
         """
         # Ensure FAISS index is loaded
-        if self.index is None:
-            print("Loading FAISS index...")
-            self.load_faiss_index()
+        self._ensure_faiss_index_loaded()
 
         # Compute query embedding
         query_embedding = self.embedding_model.encode(query, 
@@ -49,7 +57,7 @@ class KnowledgeManager:
         query_embedding = np.array([query_embedding], dtype="float32")
 
         # Search the FAISS index
-        distances, indices = self.index.search(query_embedding, top_k)
+        distances, indices = KnowledgeManager._faiss_index.search(query_embedding, top_k)
 
         # Filter results based on distance threshold
         results = [
