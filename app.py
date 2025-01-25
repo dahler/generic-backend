@@ -4,10 +4,27 @@ from LLM.AIManager import AIManager
 from DBManager import get_session
 from KnowledgeManager.KnowledgeManager import KnowledgeManager
 
+# Initialize Flask app
 app = Flask(__name__)
-db_manager = DBManager(get_session)
-ai_manager = AIManager("deepseek")
-know_manager = KnowledgeManager()
+
+# Initialize components
+def initialize_app():
+    print("starting Database ........")
+    db_manager = DBManager(get_session)
+    print(" ")
+
+    print("starting AI Manager ........")
+    ai_manager = AIManager("deepseek")
+    print(" ")
+
+    print("starting FAISS ........")
+    know_manager = KnowledgeManager()
+    print("")
+
+    return db_manager, ai_manager, know_manager
+
+# Global objects initialized once
+db_manager, ai_manager, know_manager = initialize_app()
 
 def process_conversation(question: str, conversation_id: str = None):
     """Handle conversation creation or retrieval and save the user's question."""
@@ -69,5 +86,8 @@ async def ask_law_question_bare():
     conversation_id, prev_con = process_conversation(question, conversation_id)
     return await generate_response(question, conversation_id, prev_con)
 
+# Run the app
 if __name__ == "__main__":
-    app.run(debug=True)
+    # Use a WSGI server like Gunicorn or Waitress in production
+    # app.run(host="0.0.0.0", port=5000, debug=False)
+    app.run(debug=False)
