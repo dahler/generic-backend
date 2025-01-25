@@ -63,7 +63,6 @@ class AIManager:
 
         Pertanyaan: {question}
         Have the response in the format below
-        Jawaban:
         """
         # print(prompt)
         return await self.ask(prompt)
