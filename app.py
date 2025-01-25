@@ -57,7 +57,7 @@ async def generate_response(question: str, conversation_id: str, prev_con, conte
 def chat_seaweed():
     return jsonify("Chat seaweed")
 
-@app.route('/api/ask-indria-faiss', methods=['POST'])
+@app.route('/api/ask-indria', methods=['POST'])
 async def ask_law_question():
     data = request.json
     question = data.get("question")
@@ -74,7 +74,7 @@ async def ask_law_question():
 
     return await generate_response(question, conversation_id, prev_con, context)
 
-@app.route('/api/ask-indria', methods=['POST'])
+@app.route('/api/ask-indria-no-faiss', methods=['POST'])
 async def ask_law_question_bare():
     data = request.json
     question = data.get("question")
