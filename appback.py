@@ -1,28 +1,30 @@
-import os
-import asyncio
 from flask import Flask, jsonify, request
 from DBManager.DBManager import DBManager
-from DBManager.Models import FinanceDocument, LawDocument
 from LLM.AIManager import AIManager
 from DBManager import get_session
-from KnowledgeManager.KnowledgeManager import KnowledgeManager
+from KnowledgeManager.KnowledgeManagerBack import KnowledgeManager
 
 # Initialize Flask app
 app = Flask(__name__)
 
 # Initialize components
-print("Starting Database ........")
-db_manager = DBManager(get_session)
-print(" ")
+def initialize_app():
+    print("starting Database ........")
+    db_manager = DBManager(get_session)
+    print(" ")
 
-print("Starting AI Manager ........")
-ai_manager = AIManager("deepseek")
-print(" ")
+    print("starting AI Manager ........")
+    ai_manager = AIManager("deepseek")
+    print(" ")
 
-print("Starting FAISS ........")
-law_manager = KnowledgeManager("faiss_index")
-duit_manager = KnowledgeManager("faiss_finance_index")
-print(" ")
+    print("starting FAISS ........")
+    know_manager = KnowledgeManager()
+    print("")
+
+    return db_manager, ai_manager, know_manager
+
+# Global objects initialized once
+db_manager, ai_manager, know_manager = initialize_app()
 
 def process_conversation(question: str, conversation_id: str = None):
     """Handle conversation creation or retrieval and save the user's question."""
@@ -39,11 +41,9 @@ def process_conversation(question: str, conversation_id: str = None):
     return conversation_id, prev_con
 
 async def generate_response(question: str, conversation_id: str, prev_con, context=None):
-    """Generate a response using AI asynchronously but keep Flask synchronous."""
+    """Generate a response using AI and save the assistant's answer."""
     try:
-        # Directly await the AI function
         answer, error = await ai_manager.ask_law_ai(question, previous_conversation=prev_con, document_context=context)
-
         if error:
             return jsonify({"error": error}), 500
 
@@ -59,7 +59,7 @@ def chat_seaweed():
 
 @app.route('/api/ask-indria', methods=['POST'])
 async def ask_law_question():
-    data = request.get_json()
+    data = request.json
     question = data.get("question")
     conversation_id = data.get("conversation_id")
 
@@ -68,19 +68,15 @@ async def ask_law_question():
 
     conversation_id, prev_con = process_conversation(question, conversation_id)
 
-    # Fetch context from knowledge manager (awaiting the search method)
-    ids = await law_manager.search(question)
+    # Fetch context from knowledge manager
+    ids = know_manager.search(question)
+    context = " ".join(db_manager.get_context(id)["content"] for id in ids if db_manager.get_context(id))
 
-    print(ids)
-    context_results = [db_manager.get_context(id, LawDocument) for id in ids]
-    context = " ".join(res["content"] for res in context_results if res)
-
-    # print(context)
     return await generate_response(question, conversation_id, prev_con, context)
 
 @app.route('/api/ask-duit', methods=['POST'])
 async def ask_duit_question():
-    data = request.get_json()
+    data = request.json
     question = data.get("question")
     conversation_id = data.get("conversation_id")
 
@@ -88,16 +84,10 @@ async def ask_duit_question():
         return jsonify({"error": "Question is required"}), 400
 
     conversation_id, prev_con = process_conversation(question, conversation_id)
-
-    ids = await duit_manager.search(question)
-
-    context_results = [db_manager.get_context(id, FinanceDocument) for id in ids]
-    # print(context_results)
-
-    context = " ".join(res["content"] for res in context_results if res)
-
-    return await generate_response(question, conversation_id, prev_con, context)
+    return await generate_response(question, conversation_id, prev_con)
 
 # Run the app
 if __name__ == "__main__":
-    app.run(debug=False, host="0.0.0.0", port=5000)
+    # Use a WSGI server like Gunicorn or Waitress in production
+    # app.run(host="0.0.0.0", port=5000, debug=False)
+    app.run(debug=False)

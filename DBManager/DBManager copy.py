@@ -39,41 +39,25 @@ class DBManager:
         )
         return [{"role": m.role, "content": m.content} for m in messages]
     
-    # def get_context(self, id):
-    #     """Retrieve a single document by its ID."""
-    #     with self.session_factory() as session:
-    #         # Query the database
-    #         document = (
-    #             session.query(LawDocument.content, LawDocument.metadata_column)
-    #             .filter(LawDocument.id == int(id))
-    #             .first()
-    #         )
-        
-    #         # Handle the case where no document is found
-    #         if not document:
-    #             return None
-
-    #         # Construct and return the result
-    #         return {
-    #             "content": document.content,
-    #             "metadata": document.metadata_column
-    #         }
-
-
-    def get_context(self, id, model):
-        """Retrieve a document from a dynamic table model by its ID."""
+    def get_context(self, id):
+        """Retrieve a single document by its ID."""
         with self.session_factory() as session:
-            # Query the table based on the provided model
+            # Query the database
             document = (
-                session.query(model)
-                .filter(model.id == int(id))
+                session.query(LawDocument.content, LawDocument.metadata_column)
+                .filter(LawDocument.id == int(id))
                 .first()
             )
-
+        
             # Handle the case where no document is found
             if not document:
                 return None
 
-            # Return the relevant fields from the document dynamically
-            return {col.name: getattr(document, col.name) for col in model.__table__.columns} 
+            # Construct and return the result
+            return {
+                "content": document.content,
+                "metadata": document.metadata_column
+            }
+
+            
 

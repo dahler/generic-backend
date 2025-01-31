@@ -66,6 +66,24 @@ class AIManager:
         """
         # print(prompt)
         return await self.ask(prompt)
+    
+     async def ask_finance_ai(self, question, previous_conversation=None, document_context=None):
+        context = ""
+        if previous_conversation:
+            context += f"Percakapan Sebelumnya: {previous_conversation}\n"
+        if document_context:
+            context += f"Data dari Dokumen: {document_context}\n"
+
+        prompt = f"""
+        {self.rules_law}
+
+        {context}
+
+        Pertanyaan: {question}
+        Have the response in the format below
+        """
+        # print(prompt)
+        return await self.ask(prompt)
 
     # async def create_prompt_bank(self, question, previous_question=None, previous_conversation=None, document_context=None):
     #     context = ""

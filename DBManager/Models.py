@@ -40,3 +40,10 @@ class LawDocument(Base):
     id = Column(Integer, primary_key=True)
     content = Column(Text, nullable=False)
     metadata_column = Column("metadata", String(255))  # Alias the column name
+
+
+class FinanceDocument(Base):
+    __tablename__ = "finance_documents"
+    id = Column(Integer, primary_key=True)
+    content = Column(Text, nullable=False)
+    descriptor = Column(String(255))  # Alias the column name
