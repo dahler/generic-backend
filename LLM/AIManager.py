@@ -67,7 +67,7 @@ class AIManager:
         # print(prompt)
         return await self.ask(prompt)
     
-     async def ask_finance_ai(self, question, previous_conversation=None, document_context=None):
+    async def ask_finance_ai(self, question, previous_conversation=None, document_context=None):
         context = ""
         if previous_conversation:
             context += f"Percakapan Sebelumnya: {previous_conversation}\n"
