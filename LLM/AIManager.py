@@ -48,6 +48,32 @@ class AIManager:
     #     Jawab Pertanyaan: {question}
     #     """
     #     return await self.ask(prompt)
+
+    async def ask_ai(self, question, previous_conversation=None, document_context=None, topic='law'):
+        context = ""
+        if previous_conversation:
+            context += f"Percakapan Sebelumnya: {previous_conversation}\n"
+        if document_context:
+            context += f"Data dari Dokumen: {document_context}\n"
+
+        # Dynamically select the appropriate rule based on the topic
+        if topic == 'law':
+            rule = self.rules_law
+        else:
+            rule = self.rules_advise
+
+        prompt = f"""
+        {rule}
+
+        {context}
+
+        Pertanyaan: {question}
+        Jawab pertanyaan 
+        """
+
+        # print(prompt)
+        return await self.ask(prompt)
+    
     
     async def ask_law_ai(self, question, previous_conversation=None, document_context=None):
         context = ""
@@ -66,6 +92,8 @@ class AIManager:
         """
         # print(prompt)
         return await self.ask(prompt)
+    
+
     
     async def ask_finance_ai(self, question, previous_conversation=None, document_context=None):
         context = ""

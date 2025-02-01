@@ -62,10 +62,13 @@ def process_conversation(question: str, conversation_id: str = None):
     db_manager.save_message(content=question, role="user", conversation_id=conversation_id)
     return conversation_id, prev_con
 
-async def generate_response(question: str, conversation_id: str, prev_con, context=None):
-    """Generate a response using AI asynchronously."""
+async def generate_response(question: str, conversation_id: str, prev_con, context=None, document_model = LawDocument):
+    """Generate a response using AI asynchronously.""" 
     try:
-        answer, error = await ai_manager.ask_law_ai(question, previous_conversation=prev_con, document_context=context)
+        model = 'law'
+        if document_model == FinanceDocument:
+            model = 'finance'
+        answer, error = await ai_manager.ask_ai(question, previous_conversation=prev_con, document_context=context, topic=model)
 
         if error:
             return jsonify({"error": error}), 500
@@ -92,7 +95,7 @@ async def handle_question(question, conversation_id, manager, document_model):
             retrieved_docs.append({"id": doc_id, "text": doc["content"]})
     
     if not retrieved_docs:
-        return await generate_response(question, conversation_id, prev_con, "")
+        return await generate_response(question, conversation_id, prev_con, "", document_model)
 
     doc_texts = [doc["text"] for doc in retrieved_docs]
 
@@ -118,7 +121,7 @@ async def handle_question(question, conversation_id, manager, document_model):
     print("New ranking")
     print([doc["id"] for doc, _ in ranked_results[:3]])  # Print top 3 document indices
 
-    return await generate_response(question, conversation_id, prev_con, best_context)
+    return await generate_response(question, conversation_id, prev_con, best_context, document_model)
 
 @app.route('/api/ask-indria', methods=['POST'])
 async def ask_law_question():
