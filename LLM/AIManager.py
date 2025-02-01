@@ -75,7 +75,7 @@ class AIManager:
             context += f"Data dari Dokumen: {document_context}\n"
 
         prompt = f"""
-        {self.rules_law}
+        {self.rules_advise}
 
         {context}
 
