@@ -3,7 +3,6 @@ import faiss
 import numpy as np
 from sentence_transformers import SentenceTransformer
 import asyncio
-import aiofiles
 
 class KnowledgeManager:
     _faiss_indices = {}
@@ -31,7 +30,7 @@ class KnowledgeManager:
                 KnowledgeManager._faiss_indices[self.index_name] = await asyncio.to_thread(faiss.read_index, index_path)
                 print(f"FAISS index '{self.index_name}' loaded from {index_path}.")
 
-    async def search(self, query, top_k=3, distance_threshold=8):
+    async def search(self, query, top_k=5, distance_threshold=8):
         """Asynchronous search using FAISS."""
         await self._ensure_faiss_index_loaded()
         index = KnowledgeManager._faiss_indices[self.index_name]
@@ -43,7 +42,17 @@ class KnowledgeManager:
 
         distances, indices = await asyncio.to_thread(index.search, query_embedding, top_k)
 
-        results = [int(idx) for dist, idx in zip(distances[0], indices[0]) if dist <= distance_threshold and idx != -1]
+        # results = [int(idx) for dist, idx in zip(distances[0], indices[0]) if dist <= distance_threshold and idx != -1]
 
-        print(f"Search complete. Index: '{self.index_name}' | Query: '{query}' | Results: {results}")
-        return results
+        # print(f"Search complete. Index: '{self.index_name}' | Query: '{query}' | Results: {results}")
+        # return results
+
+        # Keep results within the distance threshold
+        faiss_results = [
+            (int(idx), float(dist))  # Preserve raw FAISS distance
+            for dist, idx in zip(distances[0], indices[0])
+            if dist <= distance_threshold and idx != -1
+        ]
+
+        print(f"Search complete. Index: '{self.index_name}' | Query: '{query}' | Results: {faiss_results}")
+        return faiss_results  # Returns [(doc_id, distance)]
