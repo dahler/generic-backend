@@ -8,9 +8,9 @@ class AIManager:
     def __init__(self, provider="openai"):
         self.provider = provider
         base_dir = os.path.dirname(__file__)
-        self.rules_general = self.load_rules(os.path.join(base_dir, "rules", "rules_general.txt"))
-        self.rules_investment = self.load_rules(os.path.join(base_dir, "rules", "rules_investment.txt"))
-        self.rules_usaha = self.load_rules(os.path.join(base_dir, "rules", "rules_usaha.txt"))
+        # self.rules_general = self.load_rules(os.path.join(base_dir, "rules", "rules_general.txt"))
+        # self.rules_investment = self.load_rules(os.path.join(base_dir, "rules", "rules_investment.txt"))
+        # self.rules_usaha = self.load_rules(os.path.join(base_dir, "rules", "rules_usaha.txt"))
         self.rules_advise = self.load_rules(os.path.join(base_dir, "rules", "rules_advise.txt"))
         self.rules_law = self.load_rules(os.path.join(base_dir, "rules", "rules_general_law.txt"))
 
@@ -41,13 +41,13 @@ class AIManager:
             raise ValueError(f"Unsupported provider: {self.provider}")
         
 
-    async def check_what_to_search(self, question):
-        prompt = f""" 
-        {self.rules_general}
+    # async def check_what_to_search(self, question):
+    #     prompt = f""" 
+    #     {self.rules_general}
 
-        Jawab Pertanyaan: {question}
-        """
-        return await self.ask(prompt)
+    #     Jawab Pertanyaan: {question}
+    #     """
+    #     return await self.ask(prompt)
     
     async def ask_law_ai(self, question, previous_conversation=None, document_context=None):
         context = ""
@@ -62,7 +62,7 @@ class AIManager:
         {context}
 
         Pertanyaan: {question}
-        Have the response in the format below
+        Jawab pertanyaan 
         """
         # print(prompt)
         return await self.ask(prompt)
@@ -80,7 +80,7 @@ class AIManager:
         {context}
 
         Pertanyaan: {question}
-        Have the response in the format below
+        Jawab pertanyaan
         """
         # print(prompt)
         return await self.ask(prompt)

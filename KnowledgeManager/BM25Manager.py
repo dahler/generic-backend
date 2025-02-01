@@ -1,52 +1,46 @@
+import re
 from rank_bm25 import BM25Okapi
-from stopwords import get_stopwords
-# from sklearn.preprocessing import MinMaxScaler
-# import nltk
-# import spacy
-# nlp = spacy.blank("id")
-# nltk.download('punkt')
-# nltk.download('stopwords')
 from Sastrawi.Stemmer.StemmerFactory import StemmerFactory
 from Sastrawi.StopWordRemover.StopWordRemoverFactory import StopWordRemoverFactory
-import re
+import time
 
-# Initialize Sastrawi Stemmer & Stopword Remover
+# Initialize Sastrawi Stemmer & Stopword Remover once (avoids redundant calls)
 stemmer = StemmerFactory().create_stemmer()
-stopword_remover = StopWordRemoverFactory().create_stop_word_remover()
+stopwords = set(StopWordRemoverFactory().get_stop_words())  # Store in set for O(1) lookup
 
-
-class BM25Manager: 
-
+class BM25Manager:
     def getBM25Score(self, query, doc_texts):
-        # Get the list of stopwords
-        # stop_words = set(get_stopwords('id'))
-        # print(stop_words)
-        
-        # Tokenize the documents and remove stopwords
-        tokenized_corpus = [
-            # [word for word in nltk.word_tokenize(doc.lower()) if word not in stop_words]
-            self.tokenize_and_remove_stopwords(doc) for doc in doc_texts
-        ]
+        """Compute BM25 scores for a query against a corpus."""
+        # Tokenize documents and stem selectively
+        tokenized_corpus = [self.tokenize_and_process(doc, return_list=True) for doc in doc_texts]
 
-        # tokenized_corpus = self.tokenize_and_remove_stopwords(doc_texts)
-        query_keywords = self.tokenize_and_remove_stopwords(query)
-        
-        # Initialize BM25Okapi
+        # Initialize BM25
         bm25 = BM25Okapi(tokenized_corpus)
-        
-        # Tokenize the query and remove stopwords
-        # query_keywords = [word for word in nltk.word_tokenize(query.lower()) if word not in stop_words]
-        
-        # Get BM25 scores
-        bm25_scores = bm25.get_scores(query_keywords)
 
-        return bm25_scores
-    
-    def tokenize_and_remove_stopwords(self, text):
-        """Tokenizes, removes stopwords, and stems words using Sastrawi"""
-        # print(text)
+        # Tokenize query
+        query_keywords = self.tokenize_and_process(query, return_list=True)
+
+        # Get BM25 scores
+        return bm25.get_scores(query_keywords)
+
+    def tokenize_and_process(self, text, return_list=False):
+        """Tokenizes, removes stopwords, and stems words efficiently, applying stemming only when necessary."""
         text = text.lower()
-        text = stopword_remover.remove(text)  # Remove stopwords
-        text = stemmer.stem(text)  # Apply stemming
-        tokens = re.findall(r'\b\w+\b', text)  # Extract words
-        return tokens
+        
+        start_time = time.time()
+        # Tokenize and filter stopwords
+        processed_tokens = [word for word in re.findall(r'\b\w+\b', text) if word not in stopwords]
+
+        end_time = time.time()
+        time_taken = end_time - start_time
+        print("Time Taken to tokenize :", time_taken)
+        
+        start_time = time.time()
+        # Apply stemming only when necessary (e.g., word length > 2, as short words might be roots already)
+        # processed_tokens = [stemmer.stem(word) if len(word) > 2 else word for word in tokens]
+
+        end_time = time.time()
+        time_taken = end_time - start_time
+        print("Time Taken to stem:", time_taken)
+
+        return list(processed_tokens) if return_list else " ".join(processed_tokens)  # Return list or string
