@@ -3,7 +3,7 @@ from stopwords import get_stopwords
 # from sklearn.preprocessing import MinMaxScaler
 import nltk
 nltk.download('punkt')
-nltk.download('stopwords')
+# nltk.download('stopwords')
 
 class BM25Manager: 
 
