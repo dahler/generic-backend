@@ -9,9 +9,12 @@ from KnowledgeManager.KnowledgeManager import KnowledgeManager
 from KnowledgeManager.BM25Manager import BM25Manager
 from sklearn.preprocessing import MinMaxScaler
 import numpy as np
+from flask_cors import CORS
 
-# Initialize Flask app
 app = Flask(__name__)
+
+# Allow all origins to access your API
+CORS(app, origins="*", methods=["GET", "POST", "PUT", "DELETE"], allow_headers=["Content-Type"])
 
 # Initialize database and AI manager
 print("Starting Database ........")
@@ -144,6 +147,10 @@ async def ask_duit_question():
         return jsonify({"error": "Question is required"}), 400
 
     return await handle_question(question, conversation_id, get_duit_manager(), FinanceDocument)
+
+@app.route('/')
+def hello_world():
+    return 'Hello, World!'
 
 # Run the app
 if __name__ == "__main__":
