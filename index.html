@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Access</title>
+</head>
+<body>
+    <h1>API Data</h1>
+    <button id="fetchDataBtn">Fetch Data</button>
+    <div id="result"></div>
+
+    <script>
+        // Function to fetch data from the API
+        const data = {
+                "question": "Apa yang ahrus saya lakukan untuk mendapatkan kemandirian uang setelah 10 tahun?"
+            };
+        const fetchData = () => {
+            fetch('https://colonial-moth-thepapua-d8bc0d14.koyeb.app/api/ask-duit', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+                mode: 'cors', // Ensure the request is made with CORS enabled
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Show the API response in the div
+                document.getElementById('result').innerHTML = JSON.stringify(data, null, 2);
+            })
+            .catch(error => {
+                console.error('There was a problem with the fetch operation:', error);
+                document.getElementById('result').innerHTML = 'Error fetching data.';
+            });
+        };
+
+        // Add event listener to the button to trigger API request
+        document.getElementById('fetchDataBtn').addEventListener('click', fetchData);
+    </script>
+</body>
+</html>

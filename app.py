@@ -14,7 +14,7 @@ from flask_cors import CORS
 app = Flask(__name__)
 
 # Allow all origins to access your API
-CORS(app, origins="*", methods=["GET", "POST", "PUT", "DELETE"], allow_headers=["Content-Type"])
+CORS(app, origins="*", methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"], allow_headers=["Content-Type"])
 
 # Initialize database and AI manager
 print("Starting Database ........")
@@ -126,27 +126,38 @@ async def handle_question(question, conversation_id, manager, document_model):
 
     return await generate_response(question, conversation_id, prev_con, best_context, document_model)
 
-@app.route('/api/ask-indria', methods=['POST'])
+@app.route('/api/ask-indria', methods=['POST', 'OPTIONS'])
 async def ask_law_question():
-    data = request.get_json()
-    question = data.get("question")
-    conversation_id = data.get("conversation_id")
 
-    if not question:
-        return jsonify({"error": "Question is required"}), 400
+    if request.method == "OPTIONS":  # Handle preflight request
+        # The OPTIONS request is part of CORS preflight check
+        return "", 200  # Respond with an empty body and 200 OK
 
-    return await handle_question(question, conversation_id, get_law_manager(), LawDocument)
+    elif request.method == "POST":
+        data = request.get_json()
+        question = data.get("question")
+        conversation_id = data.get("conversation_id")
 
-@app.route('/api/ask-duit', methods=['POST'])
+        if not question:
+            return jsonify({"error": "Question is required"}), 400
+
+        return await handle_question(question, conversation_id, get_law_manager(), LawDocument)
+
+@app.route('/api/ask-duit', methods=['POST', 'OPTIONS'])
 async def ask_duit_question():
-    data = request.get_json()
-    question = data.get("question")
-    conversation_id = data.get("conversation_id")
+    if request.method == "OPTIONS":  # Handle preflight request
+        # The OPTIONS request is part of CORS preflight check
+        return "", 200  # Respond with an empty body and 200 OK
 
-    if not question:
-        return jsonify({"error": "Question is required"}), 400
+    elif request.method == "POST":
+        data = request.get_json()
+        question = data.get("question")
+        conversation_id = data.get("conversation_id")
 
-    return await handle_question(question, conversation_id, get_duit_manager(), FinanceDocument)
+        if not question:
+            return jsonify({"error": "Question is required"}), 400
+
+        return await handle_question(question, conversation_id, get_duit_manager(), FinanceDocument)
 
 @app.route('/')
 def hello_world():
