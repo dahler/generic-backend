@@ -19,7 +19,7 @@ db_manager = DBManager(get_session)
 print(" ")
 
 print("Starting AI Manager ........")
-ai_manager = AIManager("deepseek")
+ai_manager = AIManager("openai")
 print(" ")
 
 # Lazy load FAISS and BM25
